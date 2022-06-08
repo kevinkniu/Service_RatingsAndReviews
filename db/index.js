@@ -1,12 +1,19 @@
-const { Client } = require('pg');
+/* eslint-disable no-console */
 
-const db = new Client({
-  host: 'localhost',
-  user: 'apple',
-  password: '',
-  port: 3000,
+require('dotenv').config();
+
+const { Pool } = require('pg');
+
+const pool = new Pool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  database: process.env.DB_DATABASE,
+  password: process.env.DB_PASS,
+  port: process.env.DB_PORT,
 });
 
-db.connect()
+pool.connect()
   .then(() => console.log('Connected to database'))
   .catch((err) => console.log(err));
+
+module.exports = pool;
