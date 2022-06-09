@@ -64,3 +64,6 @@ COPY rrReviewPhotos(photo_id, review_id, photo_url)
 FROM '/Users/apple/Desktop/HackReactor/Senior/SDC/data/reviews_photos.csv'
 DELIMITER ','
 CSV HEADER;
+
+ALTER TABLE rrReviews
+ALTER COLUMN review_date TYPE TIMESTAMP USING (to_timestamp(review_date::decimal / 1000));
