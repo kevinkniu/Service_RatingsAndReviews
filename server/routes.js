@@ -29,8 +29,8 @@ router.get('/', (req, res) => {
     r.reviewer_name,
     r.helpfulness,
     COALESCE (
-      json_agg(
-        json_build_object(
+      json_agg (
+        json_build_object (
           'id', p.photo_id,
           'url', p.photo_url
         )
@@ -61,8 +61,41 @@ router.get('/', (req, res) => {
   });
 });
 
-// router.get('/reviews/meta', (req, res) => {
-
-// });
+router.get('/meta', (req, res) => {
+  const query = `
+  SELECT * FROM
+  ( SELECT
+    json_build_object (
+      1, SUM(CASE WHEN r.rating = 1 THEN 1 ELSE 0 END),
+      2, SUM(CASE WHEN r.rating = 2 THEN 2 ELSE 0 END),
+      3, SUM(CASE WHEN r.rating = 3 THEN 3 ELSE 0 END),
+      4, SUM(CASE WHEN r.rating = 4 THEN 4 ELSE 0 END),
+      5, SUM(CASE WHEN r.rating = 5 THEN 5 ELSE 0 END)
+    ) AS ratings
+    FROM rrReviews r
+    WHERE r.product_id = ${req.query.product_id}
+  ) AS ratings,
+  ( SELECT
+    json_build_object(
+      false, SUM(CASE WHEN r.recommend = false THEN 1 ELSE 0 END),
+      true, SUM(CASE WHEN r.recommend = true THEN 1 ELSE 0 END)
+    ) AS recommended
+  FROM rrReviews r
+  WHERE r.product_id = ${req.query.product_id}
+  ) AS recommended
+  ;`;
+  db.query(query, (err, results) => {
+    if (err) {
+      console.log(err);
+      res.status(500).send(err);
+    } else {
+      const output = {
+        product_id: req.query.product_id,
+        results: results.rows,
+      };
+      res.status(200).send(output);
+    }
+  });
+});
 
 module.exports = router;
