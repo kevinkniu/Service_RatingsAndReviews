@@ -24,6 +24,8 @@ COPY rrReviews(review_id, product_id, rating, review_date, summary, body, recomm
 FROM '/Users/apple/Desktop/HackReactor/Senior/SDC/data/reviews.csv'
 DELIMITER ','
 CSV HEADER;
+SELECT SETVAL('rrReviews_review_id_seq', (SELECT MAX(review_id) FROM rrReviews) + 1);
+
 
 DROP TABLE IF EXISTS rrChars CASCADE;
 
@@ -51,11 +53,12 @@ COPY rrCharsReviews(charsReview_id, chars_id, review_id, value)
 FROM '/Users/apple/Desktop/HackReactor/Senior/SDC/data/characteristic_reviews.csv'
 DELIMITER ','
 CSV HEADER;
+SELECT SETVAL('rrCharsReviews_charsReview_id_seq', (SELECT MAX(charsReview_id) FROM rrCharsReviews) + 1);
 
 DROP TABLE IF EXISTS rrReviewPhotos CASCADE;
 
 CREATE TABLE rrReviewPhotos (
-  photo_id SERIAL NOT NULL,
+  photo_id SERIAL NOT NULL PRIMARY KEY,
   review_id INT REFERENCES rrReviews(review_id),
   photo_url VARCHAR NOT NULL
 );
@@ -64,6 +67,7 @@ COPY rrReviewPhotos(photo_id, review_id, photo_url)
 FROM '/Users/apple/Desktop/HackReactor/Senior/SDC/data/reviews_photos.csv'
 DELIMITER ','
 CSV HEADER;
+SELECT SETVAL('rrReviewPhotos_photo_id_seq', (SELECT MAX(photo_id) FROM rrReviewPhotos) + 1);
 
 ALTER TABLE rrReviews
 ALTER COLUMN review_date TYPE TIMESTAMP USING (to_timestamp(review_date::decimal / 1000));

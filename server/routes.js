@@ -47,7 +47,6 @@ router.get('/', (req, res) => {
   ;`;
   db.query(query, (err, results) => {
     if (err) {
-      console.log(err);
       res.status(500).send(err);
     } else {
       const output = {
@@ -65,15 +64,17 @@ router.get('/meta', (req, res) => {
   const query = `
   SELECT * FROM
   ( SELECT
-    json_build_object (
-      1, SUM(CASE WHEN r.rating = 1 THEN 1 ELSE 0 END),
-      2, SUM(CASE WHEN r.rating = 2 THEN 2 ELSE 0 END),
-      3, SUM(CASE WHEN r.rating = 3 THEN 3 ELSE 0 END),
-      4, SUM(CASE WHEN r.rating = 4 THEN 4 ELSE 0 END),
-      5, SUM(CASE WHEN r.rating = 5 THEN 5 ELSE 0 END)
+    json_object_agg (
+      ratings.rating, count
     ) AS ratings
-    FROM rrReviews r
-    WHERE r.product_id = ${req.query.product_id}
+    FROM (
+      SELECT
+        r.rating,
+        COUNT(*)
+      FROM rrReviews r
+      WHERE r.product_id = ${req.query.product_id}
+      GROUP BY r.rating
+    ) AS ratings
   ) AS ratings,
   ( SELECT
     json_build_object(
@@ -82,11 +83,28 @@ router.get('/meta', (req, res) => {
     ) AS recommended
   FROM rrReviews r
   WHERE r.product_id = ${req.query.product_id}
-  ) AS recommended
+  ) AS recommended,
+  ( SELECT
+    json_object_agg (
+      chars.name, chars.charsArray
+    ) AS characteristics
+    FROM (
+      SELECT
+        c.name,
+        json_build_object(
+          'id', c.chars_id,
+          'value', AVG(cr.value)
+        ) AS charsArray
+      FROM rrChars c
+      INNER JOIN rrCharsReviews cr
+      ON c.chars_id = cr.chars_id
+      WHERE c.product_id = ${req.query.product_id}
+      GROUP BY c.chars_id
+    ) AS chars
+  ) AS characteristics
   ;`;
   db.query(query, (err, results) => {
     if (err) {
-      console.log(err);
       res.status(500).send(err);
     } else {
       const output = {
@@ -94,6 +112,102 @@ router.get('/meta', (req, res) => {
         results: results.rows,
       };
       res.status(200).send(output);
+    }
+  });
+});
+
+router.post('/', async (req, res) => {
+  const date = new Date().toISOString();
+  const queryArray = [];
+  const reviewQuery = `
+  INSERT INTO rrReviews (
+    product_id,
+    rating,
+    review_date,
+    summary,
+    body,
+    recommend,
+    reviewer_name,
+    reviewer_email
+  )
+  VALUES (
+    $1,
+    $2,
+    $3,
+    $4,
+    $5,
+    $6,
+    $7,
+    $8
+  )
+  RETURNING review_id
+  ;`;
+  const result = await db.query(reviewQuery, [
+    req.body.product_id,
+    req.body.rating,
+    date,
+    req.body.summary,
+    req.body.body,
+    req.body.recommend,
+    req.body.name,
+    req.body.email,
+  ]);
+  const reviewID = result.rows[0].review_id;
+  if (req.body.photos.length) {
+    req.body.photos.forEach((url) => {
+      queryArray.push(db.query(`
+      INSERT INTO rrReviewPhotos (
+        review_id,
+        photo_url
+      )
+      VALUES (
+        $1,
+        $2
+      )
+      ;`, [reviewID, url]));
+    });
+  }
+  const chars = req.body.characteristics;
+  if (Object.keys(chars).length) {
+    Object.keys(chars).forEach((char) => {
+      queryArray.push(db.query(`
+      INSERT INTO rrCharsReviews (
+        chars_id,
+        review_id,
+        value
+      ) VALUES (
+        $1,
+        $2,
+        $3
+      )
+      ;`, [char, reviewID, chars[char]]));
+    });
+  }
+  Promise.all(queryArray)
+    .then(() => res.status(200).send('review added!'))
+    .catch((err) => res.status(500).send(err));
+});
+
+router.put('/:review_id/helpful', (req, res) => {
+  const query = `
+  UPDATE rrReviews SET helpfulness = helpfulness + 1 WHERE review_id = ${req.params.review_id};`;
+  db.query(query, (err) => {
+    if (err) {
+      res.status(500).send(err);
+    } else {
+      res.status(200).send('helpfulness added!');
+    }
+  });
+});
+
+router.put('/:review_id/report', (req, res) => {
+  const query = `
+  UPDATE rrReviews SET reported = true WHERE review_id = ${req.params.review_id};`;
+  db.query(query, (err) => {
+    if (err) {
+      res.status(500).send(err);
+    } else {
+      res.status(200).send('reported!');
     }
   });
 });

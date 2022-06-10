@@ -11,10 +11,10 @@ const PORT = process.env.PORT || 3000;
 
 const app = express();
 
-app.use('/reviews', router);
-
 app.use(express.json());
 app.use(morgan('dev'));
+
+app.use('/reviews', router);
 
 app.listen(PORT, () => {
   console.log(`Server listening at port ${process.env.PORT}`);
