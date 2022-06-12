@@ -71,3 +71,13 @@ SELECT SETVAL('rrReviewPhotos_photo_id_seq', (SELECT MAX(photo_id) FROM rrReview
 
 ALTER TABLE rrReviews
 ALTER COLUMN review_date TYPE TIMESTAMP USING (to_timestamp(review_date::decimal / 1000));
+
+CREATE INDEX ON rrReviews(product_id);
+CREATE INDEX ON rrReviews(review_id);
+CREATE INDEX ON rrReviewPhotos(review_id);
+CREATE INDEX ON rrReviewPhotos(photo_id);
+CREATE INDEX ON rrChars(product_id);
+CREATE INDEX ON rrChars(chars_id);
+CREATE INDEX ON rrCharsReviews(review_id);
+CREATE INDEX ON rrCharsReviews(chars_id);
+CREATE INDEX ON rrReviewPhotos(review_id);

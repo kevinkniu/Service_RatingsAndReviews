@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+/* eslint-disable no-param-reassign */
 
 const router = require('express').Router();
 const db = require('../db');
@@ -62,7 +63,9 @@ router.get('/', (req, res) => {
 
 router.get('/meta', (req, res) => {
   const query = `
-  SELECT * FROM
+  SELECT
+  ${req.query.product_id} AS product_id,
+  * FROM
   ( SELECT
     json_object_agg (
       ratings.rating, count
@@ -107,11 +110,7 @@ router.get('/meta', (req, res) => {
     if (err) {
       res.status(500).send(err);
     } else {
-      const output = {
-        product_id: req.query.product_id,
-        results: results.rows,
-      };
-      res.status(200).send(output);
+      res.status(200).send(results.rows[0]);
     }
   });
 });
