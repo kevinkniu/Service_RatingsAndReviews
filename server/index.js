@@ -16,6 +16,10 @@ app.use(morgan('dev'));
 
 app.use('/reviews', router);
 
+app.get('/loaderio-afe20564e01fa30508a3e7ed740ebcba.txt', (req, res) => {
+  res.send('loaderio-afe20564e01fa30508a3e7ed740ebcba');
+});
+
 app.listen(PORT, () => {
   console.log(`Server listening at port ${process.env.PORT}`);
 });
