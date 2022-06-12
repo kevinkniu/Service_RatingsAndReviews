@@ -7,14 +7,14 @@ const morgan = require('morgan');
 const db = require('../db');
 const router = require('./routes');
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3333;
 
 const app = express();
 
-app.use('/reviews', router);
-
 app.use(express.json());
 app.use(morgan('dev'));
+
+app.use('/reviews', router);
 
 app.listen(PORT, () => {
   console.log(`Server listening at port ${process.env.PORT}`);
