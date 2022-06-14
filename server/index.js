@@ -16,8 +16,8 @@ app.use(morgan('dev'));
 
 app.use('/reviews', router);
 
-app.get('/loaderio-afe20564e01fa30508a3e7ed740ebcba.txt', (req, res) => {
-  res.send('loaderio-afe20564e01fa30508a3e7ed740ebcba');
+app.get('/loaderio-7da15df0d563ee27e44b1892acadfa00.txt', (req, res) => {
+  res.send('loaderio-7da15df0d563ee27e44b1892acadfa00');
 });
 
 app.listen(PORT, () => {
