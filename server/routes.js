@@ -64,7 +64,7 @@ router.get('/', (req, res) => {
 router.get('/meta', (req, res) => {
   const query = `
   SELECT
-  ${req.query.product_id} AS product_id,
+  $1 AS product_id,
   * FROM
   ( SELECT
     json_object_agg (
@@ -75,7 +75,7 @@ router.get('/meta', (req, res) => {
         r.rating,
         COUNT(*)
       FROM rrReviews r
-      WHERE r.product_id = ${req.query.product_id}
+      WHERE r.product_id = $1
       GROUP BY r.rating
     ) AS ratings
   ) AS ratings,
@@ -85,7 +85,7 @@ router.get('/meta', (req, res) => {
       true, SUM(CASE WHEN r.recommend = true THEN 1 ELSE 0 END)
     ) AS recommended
   FROM rrReviews r
-  WHERE r.product_id = ${req.query.product_id}
+  WHERE r.product_id = $1
   ) AS recommended,
   ( SELECT
     json_object_agg (
@@ -101,18 +101,14 @@ router.get('/meta', (req, res) => {
       FROM rrChars c
       INNER JOIN rrCharsReviews cr
       ON c.chars_id = cr.chars_id
-      WHERE c.product_id = ${req.query.product_id}
+      WHERE c.product_id = $1
       GROUP BY c.chars_id
     ) AS chars
   ) AS characteristics
   ;`;
-  db.query(query, (err, results) => {
-    if (err) {
-      res.status(500).send(err);
-    } else {
-      res.status(200).send(results.rows[0]);
-    }
-  });
+  db.query(query, [req.query.product_id])
+    .then((results) => res.status(200).send(results.rows[0]))
+    .catch((err) => res.status(200).send(err));
 });
 
 router.post('/', async (req, res) => {
