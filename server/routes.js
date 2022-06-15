@@ -48,6 +48,7 @@ router.get('/', (req, res) => {
   ;`;
   db.query(query, (err, results) => {
     if (err) {
+      console.log(err);
       res.status(500).send(err);
     } else {
       const output = {
