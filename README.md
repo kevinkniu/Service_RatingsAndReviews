@@ -2,17 +2,11 @@
 
 ## Summary
 
-Created a backend API microservice to provide data for an existing e-commerce website. Made incremental improvements to improve web traffic throughput (RPS) and response time in order to handle normal web traffic loads. Utilized stress testing tools such as k6 and loader.io to determine improvements in performance metrics.
+A backend API microservice to provide ratings and reviews data for an existing e-commerce website. Made incremental improvements to improve web traffic throughput (RPS) and response time in order to handle normal web traffic loads
 
-## Improvements
-
-### Database Improvements
+## Database Improvements
 
 - Built aggregate Postgres queries to help reduce database bottlenecking in query times
-- Added indexing to lookup columns in Postgres database to improve lookup times. Improved lookup times from seconds to milliseconds
-
-### Horizontal Scaling
-
 - Deployed 3 AWS EC2 server instances with load balancing server through NGINX, to increase web traffic throughput from ~100 RPS to ~2000 RPS while maintaining a 0% error rate and an average 60 ms response time.
 - Implemented Caching in NGINX to further improve throughput to ~6000 RPS while maintaining response time and 0% error rate. 
 
