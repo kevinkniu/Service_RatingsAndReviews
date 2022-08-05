@@ -7,7 +7,7 @@ A backend API microservice to provide ratings and reviews data for an existing e
 ## Database Improvements
 
 - Built aggregate Postgres queries to help reduce database bottlenecking in query times
-- Deployed 3 AWS EC2 server instances with load balancing server through NGINX, to increase web traffic throughput from ~100 RPS to ~2000 RPS while maintaining a 0% error rate and an average 60 ms response time.
+- Deployed 3 AWS EC2 server instances with load balancing server through NGINX, to increase web traffic throughput from ~100 RPS to ~6000 RPS while maintaining a 0% error rate and an average 60 ms response time.
 - Implemented Caching in NGINX to further improve throughput to ~6000 RPS while maintaining response time and 0% error rate. 
 
 ## Installation
